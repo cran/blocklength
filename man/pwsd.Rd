@@ -8,6 +8,7 @@ pwsd(
   data,
   K_N = NULL,
   M_max = NULL,
+  m_hat = NULL,
   b_max = NULL,
   c = NULL,
   round = FALSE,
@@ -27,13 +28,20 @@ columns.}
 \eqn{M}, to compute the auto-covariance for. \emph{See} Theorem 3.3 (ii) of
 Politis and White (2004).}
 
+\item{m_hat}{an integer value, if set to \code{NULL} (the default), then
+\code{m_hat} is estimated as the smallest integer after which the correlogram
+appears negligible for \code{K_N} lags. In problematic cases, setting
+\code{m_hat} to an integer value can be used to override the estimation
+procedure.}
+
 \item{b_max}{a numeric value, the upper-bound for the optimal block-length.
 Defaults to \code{ceiling(min(3 * sqrt(n), n / 3))} per Politis and White
 (2004).}
 
 \item{c}{a numeric value, the constant which acts as the significance level
-for the implied hypothesis test. Defaults to \code{qnorm(0.975)} for a 95\%
-confidence level. Politis and  White (2004) suggest \code{c = 2}.}
+for the implied hypothesis test. Defaults to \code{qnorm(0.975)} for a
+two-tailed 95\% confidence level. Politis and  White (2004) suggest
+\code{c = 2}.}
 
 \item{round}{a logical value, if set to \code{FALSE} then the final
 block-length output will not be rounded, the default. If set to \code{TRUE}
@@ -43,7 +51,7 @@ numbers.}
 \item{correlogram}{a logical value, if set to \code{TRUE} a plot of the
 correlogram (\emph{i.e.} a plot of \eqn{R(k)} vs. \eqn{k}) will be output to
 the console. If set to \code{FALSE}, no interim plots will be output to the
-console, but may be plotting later using the corresponding S3 method,
+console, but may be plotted later using the corresponding S3 method,
 \link{plot.pwsd}.}
 }
 \value{

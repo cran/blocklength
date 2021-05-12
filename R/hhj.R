@@ -21,7 +21,7 @@
 #'  algorithm to compute.
 #' @param pilot_block_length a numeric value, the block-length (\eqn{l*} in
 #'  \emph{HHJ}) for which to perform initial block bootstraps.
-#' @param sub_block_length a numeric value, the length of each overlapping
+#' @param sub_sample a numeric value, the length of each overlapping
 #'  subsample, \eqn{m} in \emph{HHJ}.
 #' @param k a character string, either \code{"bias/variance"},
 #'  \code{"one-sided"}, or \code{"two-sided"} depending on the desired object of
@@ -80,13 +80,13 @@
 #'                         n = 500, innov = rnorm(500))
 #'
 #' # Calculate optimal block length for series
-#' hhj(sim, sub_block_length = 10)
+#' hhj(sim, sub_sample = 10)
 #'
 #'
 #' # Use parallel computing
 #' library(parallel)
 #'
-#' # Make cluster object with all cores available
+#' # Make cluster object with 2 cores
 #' cl <- makeCluster(2)
 #'
 #' # Calculate optimal block length for series
@@ -98,7 +98,7 @@ hhj <- function(
   nb = 100L,
   n_iter = 10L,
   pilot_block_length = NULL,
-  sub_block_length = NULL,
+  sub_sample = NULL,
   k = "two-sided",
   bofb = 1L,
   search_grid = NULL,
@@ -155,10 +155,12 @@ hhj <- function(
   }
 
   # Check block-length of subsamples
-  if (is.null(sub_block_length)) {
+  if (is.null(sub_sample)) {
     m <- round(n^(1 / 5) * n^(1 / k))
+  } else if (sub_sample >= n) {
+    stop("sub_sample must be less than series length")
   } else {
-    m <- sub_block_length
+    m <- round(sub_sample)
   }
 
   # Initialize overlapping sub samples list
@@ -214,7 +216,7 @@ hhj <- function(
         lengths(grid), " function evaluations required.")
     }
 
-    # Create sub-blocks of length m = sub_block_length
+    # Create sub-blocks of length m = sub_sample
     for (i in seq_len(length.out = (n - m + 1))) {
       series.list[[i]] <- series[seq(from = i, to = (i + m - 1), by = 1)]
     }
@@ -313,6 +315,32 @@ hhj <- function(
     if (isTRUE(verbose)) {
       message(" Chosen block length: ", l_star, "  After iteration: ", j)
     }
+
+    # Print if final-iteration is reached w/ no convergence
+    if (j == n_iter) {
+
+      # Warning message about no convergence
+      warning(
+        "Block-length has not converged. Stopping at iteration limit: ", j, "\n",
+        "  Result may be spurious"
+        )
+
+      # Compile results list with custom class
+      result <- structure(
+        list(
+          "Optimal Block Length" = l_star,
+          "Subsample block size (m)" = m,
+          "MSE Data" = p.data,
+          "Iterations" = j,
+          "Series" = deparse(substitute(series)),
+          "Call" = call
+        ),
+        class = "hhj")
+
+      # Return list of results
+      return(result)
+    }
+
   }
 }
 

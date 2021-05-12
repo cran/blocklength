@@ -16,12 +16,18 @@
 #' @param M_max an integer value, the upper-bound for the optimal number of lags,
 #'  \eqn{M}, to compute the auto-covariance for. \emph{See} Theorem 3.3 (ii) of
 #'  Politis and White (2004).
+#' @param m_hat an integer value, if set to \code{NULL} (the default), then
+#'  \code{m_hat} is estimated as the smallest integer after which the correlogram
+#'  appears negligible for \code{K_N} lags. In problematic cases, setting
+#'  \code{m_hat} to an integer value can be used to override the estimation
+#'  procedure.
 #' @param b_max a numeric value, the upper-bound for the optimal block-length.
 #'  Defaults to \code{ceiling(min(3 * sqrt(n), n / 3))} per Politis and White
 #'  (2004).
 #' @param c a numeric value, the constant which acts as the significance level
-#'  for the implied hypothesis test. Defaults to \code{qnorm(0.975)} for a 95\%
-#'  confidence level. Politis and  White (2004) suggest \code{c = 2}.
+#'  for the implied hypothesis test. Defaults to \code{qnorm(0.975)} for a
+#'  two-tailed 95\% confidence level. Politis and  White (2004) suggest
+#'  \code{c = 2}.
 #' @param round a logical value, if set to \code{FALSE} then the final
 #'  block-length output will not be rounded, the default. If set to \code{TRUE}
 #'  the final estimates for the optimal block-length will be rounded to whole
@@ -29,7 +35,7 @@
 #' @param correlogram a logical value, if set to \code{TRUE} a plot of the
 #'  correlogram (\emph{i.e.} a plot of \eqn{R(k)} vs. \eqn{k}) will be output to
 #'  the console. If set to \code{FALSE}, no interim plots will be output to the
-#'  console, but may be plotting later using the corresponding S3 method,
+#'  console, but may be plotted later using the corresponding S3 method,
 #'  \link{plot.pwsd}.
 #'
 #' @return an object of class 'pwsd'
@@ -71,7 +77,8 @@
 pwsd <- function(
   data,
   K_N = NULL,
-  M_max= NULL,
+  M_max = NULL,
+  m_hat = NULL,
   b_max = NULL,
   c = NULL,
   round = FALSE,
@@ -99,7 +106,8 @@ pwsd <- function(
   # Initialize list to hold correlogram series
   autocorrelation <- vector(mode = "list", length = k)
 
-  for(i in seq_len(length.out = k)) {
+  # Iterate over each column supplied to data
+  for (i in seq_len(length.out = k)) {
 
     # Construct auto-correlations, rho(k)
     autocorrelation[[i]] <- stats::acf(
@@ -108,56 +116,49 @@ pwsd <- function(
       type = "correlation",
       plot = FALSE)
 
-    rho.k <- autocorrelation[[i]]$acf[-1]
+    # Remove lag 0 for testing
+    rho_k <- autocorrelation[[i]]$acf[-1]
+
+    # Set critical value for implied hypothesis test
+    rho_k_critical <- c * sqrt(log10(n) / n)
+
+    # Set m_hat
+    if (is.null(m_hat)) {
+
+      # Estimate m_hat with implied hypothesis test of correlation structure
+      m_hat <- implied_hypothesis(
+        rho_k = rho_k,
+        rho_k_critical = rho_k_critical,
+        K_N = K_N
+      )
+
+    } else {
+
+      stopifnot(all.equal(m_hat %% 1, 0))
+
+    }
 
     # Plot correlogram
     if (isTRUE(correlogram)) {
+
+      # Set y-axis limits
+      ylim <- range(autocorrelation[[i]]$acf, rho_k_critical, -rho_k_critical)
+
       plot(
         autocorrelation[[i]],
-        ci = stats::pnorm(c),
-        ci.col =  "darkmagenta",
+        ci = 0,
         xlab = "Lag (k)",
-        main = paste0("Correlogram for: ", colnames(data)[i])
+        main = paste0("Correlogram for: ", colnames(data)[i]),
+        ylim = ylim
         )
+
+      # Add implied significance bands
+      graphics::abline(h = c(rho_k_critical, -rho_k_critical),
+        col = "darkmagenta",
+        lty = "dotdash")
     }
 
-    # Set critical value for implied hypothesis test
-    rho.k.critical <- c * sqrt(log10(n) / n)
-
-    # Count number of insignificant runs for each possible k of rho(k)
-    acfSignificant <- sapply(X = seq_len(length.out = (M_max - K_N + 1)),
-      FUN = sigTest,
-      # Parameters for sigTest
-      rho.k = rho.k,
-      rho.k.critical = rho.k.critical,
-      K_N = K_N
-      )
-
-    # Look for insignificant runs of length K_N and take the smallest k
-    if(any(acfSignificant == K_N)) {
-      m_hat <- min(which(acfSignificant == K_N))
-    } else {
-
-      # If no runs of length K_N are insignificant, take smallest significant value
-      if(any(abs(rho.k) > rho.k.critical)) {
-
-        sigLags <- which(abs(rho.k) > 10)
-        numSig <- length(sigLags)
-
-        if(length(numSig) > 0) {
-
-          m_hat <- max(sigLags)
-
-        } else {
-
-          # Use 1 as default if no prior conditions are satisfied
-          m_hat <- 1
-
-        }
-      }
-    }
-
-    # Compute M (m_hat is at least one).
+    # Compute M (m_hat is at least one)
     M <- ifelse(2 * m_hat > M_max, M_max, 2 * m_hat)
 
     # Generate sequence of lags to look over
@@ -169,6 +170,7 @@ pwsd <- function(
       type = "covariance",
       plot = FALSE)$acf
 
+    # Calculate final parameters
     G_hat <- sum(lambda(k_seq / M) * abs(k_seq) * R.k)
 
     D_CB_hat <- (4 / 3) * sum(lambda(k_seq / M) * R.k)^2
@@ -206,7 +208,7 @@ pwsd <- function(
   result <- structure(list(
     "BlockLength" = blocklengths,
     "Acf" = autocorrelation,
-    "parameters" = cbind(n, k, c, K_N, M_max, b_max, m_hat, M, rho.k.critical),
+    "parameters" = cbind(n, k, c, K_N, M_max, b_max, m_hat, M, rho_k_critical),
     "Call" = call
     ), class = "pwsd")
 
@@ -216,14 +218,44 @@ pwsd <- function(
 
 # Helper Functions --------------------------------------------------------
 
-# Function to construct "flat-top" lag window for spectral density estimation
+# "Flat-top" lag window for spectral density estimation
 ## Based on Politis, D.N. and J.P. Romano (1995)
 lambda <- function(t) {
   return((abs(t) >= 0) * (abs(t) < 0.5) + 2 *
       (1 - abs(t)) * (abs(t) >= 0.5) * (abs(t)<=1))
 }
 
-# Function to count the number of significant auto-correlations or given K_N
-sigTest <- function(j, rho.k, rho.k.critical, K_N) {
-  sum((abs(rho.k) < rho.k.critical)[j:(j + K_N - 1)])
+# Select m_hat via an implied hypothesis test of the series correlation structure
+implied_hypothesis <- function(rho_k, rho_k_critical, K_N) {
+
+  # Count consecutive significant/insignificant lags
+  run_lengths <- rle(abs(rho_k) < rho_k_critical)
+
+  # Take first consecutive insignificant run of length at least K_N
+  if (any(run_lengths$values & run_lengths$lengths >= K_N)) {
+
+    # Save position
+    run_pos <- min(which(run_lengths$values & run_lengths$lengths >= K_N))
+
+    if (run_pos == 1) {
+      m_hat <- 1
+      } else {
+        # Sum up lengths of all previous runs to index position immediately prior
+        m_hat <- sum(run_lengths$lengths[seq_len(length.out = run_pos - 1)])
+      }
+
+  } else if (any(abs(rho_k) > rho_k_critical)) {
+
+    # If no runs of K_N are insignificant, then take the largest significant lag
+    m_hat <- max(which(abs(rho_k) > rho_k_critical))
+
+  } else {
+
+    # Set m_hat to 1 if no lags are significant
+    m_hat <- 1
+
+  }
+
+  return(as.integer(m_hat))
+
 }

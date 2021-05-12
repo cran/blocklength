@@ -1,14 +1,23 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# blocklength
+# blocklength <img src="man/figures/logo.svg" alt="" style="padding-left: 20px" align="right" />
 
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/Alec-Stashevsky/blocklength/workflows/R-CMD-check/badge.svg)](https://github.com/Alec-Stashevsky/blocklength/actions)
-[![codecov](https://codecov.io/gh/Alec-Stashevsky/blocklength/branch/main/graph/badge.svg?token=U2RFAU594R)](https://codecov.io/gh/Alec-Stashevsky/blocklength)
-
+[![CRAN
+status](https://www.r-pkg.org/badges/version/blocklength)](https://CRAN.R-project.org/package=blocklength)
+[![Downloads](https://cranlogs.r-pkg.org/badges/grand-total/blocklength?color=brightgreen)](https://CRAN.R-project.org/package=blocklength)
+[![CRAN/METACRAN](https://img.shields.io/cran/l/blocklength)](https://CRAN.R-project.org/package=blocklength)
+[![codecov](https://codecov.io/gh/Alec-Stashevsky/blocklength/branch/main/graph/badge.svg?token=U2RFAU594R)](https://codecov.io/gh/Alec-Stashevsky/blocklength)  
 <!-- badges: end -->
+
+`blocklength` is an R package used to automatically select the
+block-length parameter for a block-bootstrap. It is meant for use with
+dependent data such as stationary time series.
+
+## The Story
 
 Regular bootstrap methods rely on assumptions that observations are
 independent and identically distributed (*i.i.d.*), but this assumption
@@ -29,9 +38,9 @@ The problem with the block bootstrap is the high sensitivity to the
 choice of block-length, or the number of blocks to break the time series
 into.
 
-The goal of `{blocklength}` is to simplify and automate the process of
+The goal of `blocklength` is to simplify and automate the process of
 selecting a block-length to perform a bootstrap on dependent data.
-`{blocklength}` has several functions that take their name from the
+`blocklength` has several functions that take their name from the
 authors who have proposed them. Currently, there are two methods
 available:
 
@@ -66,12 +75,15 @@ choice of block-length.
 
 ## Installation
 
-<!-- You can install the released version of blocklength from [CRAN](https://CRAN.R-project.org) with: -->
-<!-- ``` r -->
-<!-- install.packages("blocklength") -->
-<!-- ``` -->
+You can install the released version from
+[CRAN](https://cran.r-project.org/package=blocklength) with:
 
-Install the development version from [GitHub](https://github.com) with:
+``` r
+install.packages("blocklength")
+```
+
+You can install the development version from
+[GitHub](https://github.com/Alec-Stashevsky/blocklength) with:
 
 ``` r
 # install.packages("devtools")
@@ -80,12 +92,10 @@ devtools::install_github("Alec-Stashevsky/blocklength")
 
 ## Upcoming changes
 
--   add support to estimate 1 and 2-sided distribution functions w/ hhj
--   change parallel to `{foreach}` (Pending feedback)
--   Build tests
-    -   Overlapping subsamples cover entire series
+-   change parallel to `{foreach}` or `{future}` (pending user
+    feedback - let me know!)
 
-## Example
+## Use Case
 
 We want to select the optimal block-length to perform a block bootstrap
 on a simulated autoregressive *AR(1)* time series.
@@ -94,7 +104,6 @@ First we will generate the time series:
 
 ``` r
 library(blocklength)
-set.seed(32)
 
 # Simulate AR(1) time series
 series <- stats::arima.sim(model = list(order = c(1, 0, 0), ar = 0.5),
@@ -104,11 +113,11 @@ series <- stats::arima.sim(model = list(order = c(1, 0, 0), ar = 0.5),
 Now, we can find the optimal block-length to perform a block-bootstrap.
 We do this using two methods.
 
-#### 1. The Hall, Horowitz, and Jing (1995) “HHJ” Method
+### 1. The Hall, Horowitz, and Jing (1995) “HHJ” Method
 
 ``` r
 ## Using the HHJ Algorithm with overlapping subsamples of width 10
-hhj(series, sub_block_length = 10, k = "bias/variance")
+hhj(series, sub_sample = 10, k = "bias/variance")
 #>  Pilot block length is: 3
 #> Registered S3 method overwritten by 'quantmod':
 #>   method            from
@@ -118,11 +127,11 @@ hhj(series, sub_block_length = 10, k = "bias/variance")
 #>  Chosen block length: 11  After iteration: 1
 ```
 
-<img src="man/figures/README-hhj-1.svg" width="100%" />
+<img src="man/figures/README-hhj-1.svg" width="100%" style="display: block; margin: auto;" />
 
     #>  Converged at block length (l): 11
 
-<img src="man/figures/README-hhj-2.svg" width="100%" />
+<img src="man/figures/README-hhj-2.svg" width="100%" style="display: block; margin: auto;" />
 
     #> $`Optimal Block Length`
     #> [1] 11
@@ -160,12 +169,12 @@ hhj(series, sub_block_length = 10, k = "bias/variance")
     #> [1] "series"
     #> 
     #> $Call
-    #> hhj(series = series, sub_block_length = 10, k = "bias/variance")
+    #> hhj(series = series, sub_sample = 10, k = "bias/variance")
     #> 
     #> attr(,"class")
     #> [1] "hhj"
 
-#### 2. The Politis and White (2004) Spectral Density Estimation “PWSD” Method
+### 2. The Politis and White (2004) Spectral Density Estimation “PWSD” Method
 
 ``` r
 # Coerce time series to data.frame
@@ -175,11 +184,11 @@ data <- data.frame("AR1" = series)
 pwsd(data) 
 ```
 
-<img src="man/figures/README-pwsd-1.svg" width="100%" />
+<img src="man/figures/README-pwsd-1.svg" width="100%" style="display: block; margin: auto;" />
 
     #> $BlockLength
     #>     b_Stationary b_Circular
-    #> AR1     10.24828   11.73136
+    #> AR1     9.327923   10.67781
     #> 
     #> $Acf
     #> $Acf$AR1
@@ -195,8 +204,8 @@ pwsd(data)
     #> 
     #> 
     #> $parameters
-    #>        n k        c K_N M_max b_max m_hat M rho.k.critical
-    #> [1,] 500 1 1.959964   5    28    68     4 8      0.1439999
+    #>        n k        c K_N M_max b_max m_hat M rho_k_critical
+    #> [1,] 500 1 1.959964   5    28    68     3 6      0.1439999
     #> 
     #> $Call
     #> pwsd(data = data)
@@ -205,4 +214,4 @@ pwsd(data)
     #> [1] "pwsd"
 
 We can see that both methods produce similar results for a block-length
-of 10-11 depending on the type of bootstrap method used.
+of 9 or 11 depending on the type of bootstrap method used.

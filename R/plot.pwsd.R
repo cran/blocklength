@@ -5,6 +5,9 @@
 #'  options on the correlogram, from which \code{plot.pwsd} is based
 #'
 #' @param x an of object of class 'pwsd' or 'acf'
+#' @param main an overall title for the plot, if no string is supplied a default
+#'  title  will be populated. \emph{See} \code{\link[graphics]{title}}
+#' @param ylim a numeric of length 2 giving the y-axis limits for the plot
 #'
 #' @inheritParams pwsd
 #' @inheritDotParams base::plot
@@ -24,7 +27,7 @@
 #' b <- pwsd(sim, round = TRUE, correlogram = FALSE)
 #' plot(b)
 #'
-plot.pwsd <- function(x, c = NULL, ...) {
+plot.pwsd <- function(x, c = NULL, main = NULL, ylim = NULL, ...) {
 
   # Check class
   stopifnot(any(class(x) == "pwsd"))
@@ -36,18 +39,37 @@ plot.pwsd <- function(x, c = NULL, ...) {
   # Set c to input if not NULL
   if (is.null(c)) {
     c <- x$parameters[, "c"]
-  } else {c <- c}
+  }
+
+  # Set significance bands
+  rho_k_critical <- c * sqrt(log10(x$parameters[, "n"]) / x$parameters[, "n"])
 
   # Plot acf
   j <- 1
   for (i in acf) {
 
-    # Plot ACT
+    # Set plot title
+    if (is.null(main)) {
+      main <- paste0("Correlogram for: ", names[j])
+    }
+
+    # Set y-axis limits
+    if (is.null(ylim)) {
+      ylim <- range(i$acf, rho_k_critical, -rho_k_critical)
+    }
+
+    # Plot ACF
     plot(i,
-      ci = stats::pnorm(c),
+      ci = 0,
       xlab = "Lag (k)",
-      main = paste0("Correlogram for: ", names[j]),
+      main = main,
+      ylim = ylim,
       ...)
+
+    # Add implied significance bands
+    graphics::abline(h = c(rho_k_critical, -rho_k_critical),
+      col = "darkmagenta",
+      lty = "dotdash")
 
     # Name Counter
     j <- j + 1

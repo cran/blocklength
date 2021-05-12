@@ -4,14 +4,20 @@
 \alias{plot.pwsd}
 \title{Plot Correlogram for Politis and White Auto\eqn{-}Correlation Implied Hypothesis Test}
 \usage{
-\method{plot}{pwsd}(x, c = NULL, ...)
+\method{plot}{pwsd}(x, c = NULL, main = NULL, ylim = NULL, ...)
 }
 \arguments{
 \item{x}{an of object of class 'pwsd' or 'acf'}
 
 \item{c}{a numeric value, the constant which acts as the significance level
-for the implied hypothesis test. Defaults to \code{qnorm(0.975)} for a 95\%
-confidence level. Politis and  White (2004) suggest \code{c = 2}.}
+for the implied hypothesis test. Defaults to \code{qnorm(0.975)} for a
+two-tailed 95\% confidence level. Politis and  White (2004) suggest
+\code{c = 2}.}
+
+\item{main}{an overall title for the plot, if no string is supplied a default
+title  will be populated. \emph{See} \code{\link[graphics]{title}}}
+
+\item{ylim}{a numeric of length 2 giving the y-axis limits for the plot}
 
 \item{...}{
   Arguments passed on to \code{\link[base:plot]{base::plot}}
