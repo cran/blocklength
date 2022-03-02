@@ -10,7 +10,7 @@
 status](https://www.r-pkg.org/badges/version/blocklength)](https://CRAN.R-project.org/package=blocklength)
 [![Downloads](https://cranlogs.r-pkg.org/badges/grand-total/blocklength?color=brightgreen)](https://CRAN.R-project.org/package=blocklength)
 [![CRAN/METACRAN](https://img.shields.io/cran/l/blocklength)](https://CRAN.R-project.org/package=blocklength)
-[![codecov](https://codecov.io/gh/Alec-Stashevsky/blocklength/branch/main/graph/badge.svg?token=U2RFAU594R)](https://codecov.io/gh/Alec-Stashevsky/blocklength)  
+[![codecov](https://codecov.io/gh/Alec-Stashevsky/blocklength/branch/main/graph/badge.svg?token=U2RFAU594R)](https://app.codecov.io/gh/Alec-Stashevsky/blocklength)
 <!-- badges: end -->
 
 `blocklength` is an R package used to automatically select the
@@ -215,3 +215,9 @@ pwsd(data)
 
 We can see that both methods produce similar results for a block-length
 of 9 or 11 depending on the type of bootstrap method used.
+
+## Acknowledgements
+
+A big shoutout to Malina Cheeneebash for designing the `blocklength` hex
+sticker! Also to Sergio Armella and [Simon P.
+Couch](https://www.simonpcouch.com) for their help and feedback!

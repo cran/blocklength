@@ -1,3 +1,8 @@
+# blocklength 0.1.5
+
+* Minor adjustments to documentation per CRAN requests.
+
+
 # blocklength 0.1.4
 
 
@@ -14,7 +19,7 @@
 
 * A new vignette has been included on tuning and diagnosing problematic output from the selection functions!
 
-* `pwsd()` now includes a new arguement to overide the implied hypothesis test by setting `m_hat` directly.
+* `pwsd()` now includes a new argument to override the implied hypothesis test by setting `m_hat` directly.
 
 * In `pwsd()`, `rho.k.critical` has been changed to snake case `rho_k_critical` in the `$parameters` matrix from output of class 'pwsd' objects from `pwsd().`
 

@@ -2,7 +2,7 @@ Package: blocklength
 Type: Package
 Title: Select an Optimal Block-Length to Bootstrap Dependent Data
         (Block Bootstrap)
-Version: 0.1.4
+Version: 0.1.5
 Authors@R: c(
              person("Alec", "Stashevsky",
                     email = "alec@alecstashevsky.com",
@@ -20,7 +20,7 @@ Description: A set of functions to select the optimal block-length for a
     plot methods.
 License: GPL (>= 2)
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Suggests: testthat, covr, parallel, knitr, rmarkdown
 Imports: tseries, stats
 URL: https://alecstashevsky.com/r/blocklength,
@@ -28,8 +28,8 @@ URL: https://alecstashevsky.com/r/blocklength,
 BugReports: https://github.com/Alec-Stashevsky/blocklength/issues
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2021-05-12 02:01:17 UTC; Alec
+Packaged: 2022-03-02 19:15:40 UTC; Alec
 Author: Alec Stashevsky [aut, cre],
   Sergio Armella [ctb]
 Repository: CRAN
-Date/Publication: 2021-05-12 12:12:24 UTC
+Date/Publication: 2022-03-02 23:50:02 UTC
