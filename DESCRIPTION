@@ -2,7 +2,7 @@ Package: blocklength
 Type: Package
 Title: Select an Optimal Block-Length to Bootstrap Dependent Data
         (Block Bootstrap)
-Version: 0.2.1
+Version: 0.2.2
 Authors@R: c(
              person("Alec", "Stashevsky",
                     email = "alec@alecstashevsky.com",
@@ -26,13 +26,14 @@ RoxygenNote: 7.3.2
 Suggests: testthat, covr, parallel, knitr, rmarkdown
 Imports: tseries, stats
 URL: https://alecstashevsky.com/r/blocklength,
-        https://github.com/Alec-Stashevsky/blocklength
+        https://github.com/Alec-Stashevsky/blocklength,
+        https://alec-stashevsky.github.io/blocklength/
 BugReports: https://github.com/Alec-Stashevsky/blocklength/issues
 VignetteBuilder: knitr
-Date: 2025-02-15
+Date: 2025-03-08
 NeedsCompilation: no
-Packaged: 2025-03-08 19:21:28 UTC; alec
+Packaged: 2025-03-08 20:58:22 UTC; alec
 Author: Alec Stashevsky [aut, cre] (<https://orcid.org/0000-0003-2538-4947>),
   Sergio Armella [ctb]
 Repository: CRAN
-Date/Publication: 2025-03-08 19:40:01 UTC
+Date/Publication: 2025-03-08 21:50:21 UTC
