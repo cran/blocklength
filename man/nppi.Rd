@@ -59,11 +59,26 @@ A object of class \code{nppi} with the following components:
    using the JAB method.}
   \item{jab_point_values}{The point estimates of the statistic for each
    deletion block in the JAB variance estimation. Used for diagnostic plots}
-   \item{l}{The initial block size used for bias estimation.}
-   \item{m}{The number of blocks to delete in the JAB variance estimation.}
+  \item{jab_pseudo_values}{The pseudo-values of each JAB point value.}
+  \item{l}{The initial block size used for bias estimation.}
+  \item{m}{The number of blocks to delete in the JAB variance estimation.}
 }
+}
+\description{
+This function implements the Nonparametric Plug-In (NPPI) algorithm,
+ as proposed by Lahiri, Furukawa, and Lee (2007), to select the optimal block
+ length for block bootstrap procedures.
+ The NPPI method estimates the optimal block length by balancing bias and
+ variance in block bootstrap estimators, particularly for time series and
+ other dependent data structures. The function also leverages the Moving
+ Block Bootstrap (MBB) method of (Kunsch, 1989) and the Moving Blocks
+ Jackknifte (MBJ) of Liu and Singh (1992).
+}
+\details{
+Jackknife-After-Bootstrap (JAB) variance estimation (Lahiri, 2002).
+}
+\section{References}{
 
- @section References:
 
 Efron, B. (1992), 'Jackknife-after-bootstrap standard errors and influence
      functions (with discussion)', Journal of Royal Statistical Society,
@@ -85,19 +100,7 @@ Liu, R. Y. and Singh, K. (1992), Moving blocks jackknife and bootstrap
      capture weak dependence, in R. Lepage and L. Billard, eds, 'Exploring
      the Limits of the Bootstrap', Wiley, New York, pp. 225-248.
 }
-\description{
-This function implements the Nonparametric Plug-In (NPPI) algorithm,
- as proposed by Lahiri, Furukawa, and Lee (2007), to select the optimal block
- length for block bootstrap procedures.
- The NPPI method estimates the optimal block length by balancing bias and
- variance in block bootstrap estimators, particularly for time series and
- other dependent data structures. The function also leverages the Moving
- Block Bootstrap (MBB) method of (Kunsch, 1989) and the Moving Blocks
- Jackknifte (MBJ) of Liu and Singh (1992).
-}
-\details{
-Jackknife-After-Bootstrap (JAB) variance estimation (Lahiri, 2002).
-}
+
 \examples{
 # Generate AR(1) time series
 set.seed(32)
